@@ -222,6 +222,16 @@
   .pack-item{display:flex; align-items:center; justify-content:space-between; padding:14px 4px; border-bottom:1px solid var(--line); cursor:pointer; font-size:15px;}
   .pack-item .check{color:var(--mint); font-weight:800; font-size:16px;}
 
+  /* ---------- 弹窗（复习说明） ---------- */
+  .modal-mask{position:absolute; inset:0; background:rgba(15,30,24,.5); display:flex; align-items:center; justify-content:center; z-index:70; padding:0 30px;}
+  .modal{background:#fff; border-radius:22px; padding:26px 22px 20px; width:100%; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.3);}
+  .modal-emoji{font-size:44px;}
+  .modal h3{font-size:18px; margin:10px 0 10px;}
+  .modal p{font-size:13px; color:var(--muted); line-height:1.7; margin:0 0 16px; text-align:left;}
+  .modal p b{color:var(--mint-dark);}
+  .modal-rows{display:flex; align-items:center; gap:10px; background:var(--mint-soft); border-radius:12px; padding:12px 14px; margin-bottom:18px; font-size:13px; color:var(--mint-dark); text-align:left;}
+  .m-ic{font-size:20px;}
+
   /* ---------- 页面导航（演示用） ---------- */
   .devnav{width:270px; flex:none; background:#fff; border-radius:18px; box-shadow:0 12px 32px rgba(30,80,60,.1); padding:18px;}
   .devnav h3{margin:0 0 6px; font-size:15px;}
@@ -435,6 +445,16 @@
           <div id="pack-list"></div>
         </div>
       </div>
+      <!-- 艾宾浩斯复习说明弹窗 -->
+      <div class="modal-mask" id="review-modal" style="display:none">
+        <div class="modal">
+          <div class="modal-emoji">🧠</div>
+          <h3>艾宾浩斯 · 智能复习</h3>
+          <p>本复习遵循<b>艾宾浩斯遗忘曲线</b>，系统会智能判断每个单词是否到了<b>遗忘时间节点</b>；到达节点的单词会被主动推送到你面前，用最少的复习次数记得最牢。</p>
+          <div class="modal-rows"><span class="m-ic">⏰</span><span>到达复习时间点的单词 → 主动推送给你</span></div>
+          <button class="btn btn-primary btn-full" onclick="dismissReviewModal()">知道了，开始复习</button>
+        </div>
+      </div>
     </div><!-- /phone-screen -->
   </div><!-- /phone -->
 
@@ -554,6 +574,7 @@ function show(id){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.devnav .item').forEach(b => b.classList.toggle('active', b.dataset.screen === id));
   document.getElementById('sheet-mask').classList.remove('show');
+  document.getElementById('review-modal').style.display = 'none';
 }
 function jump(name){
   if (name === 'select'){ openSelect(); return; }
@@ -727,7 +748,10 @@ function startReview(){
   if (learnList.length === 0) learnList = WORDS.slice();
   learnIdx = 0; learnMode = 'review';
   go('word'); renderWord();
+  showReviewModal();   // 进入复习时弹出艾宾浩斯说明
 }
+function showReviewModal(){ document.getElementById('review-modal').style.display = 'flex'; }
+function dismissReviewModal(){ document.getElementById('review-modal').style.display = 'none'; }
 
 /* ================= 单词详情 ================= */
 function currentWord(){ return learnList[learnIdx]; }
@@ -756,8 +780,7 @@ function renderWord(){
       + '<button class="btn btn-primary" onclick="' + (last ? 'finishLearn()' : 'wordNext()') + '">' + (last ? '完成，去检测' : '下一个') + '</button>';
   } else {
     const last = learnIdx === learnList.length - 1;
-    actions.innerHTML = '<button class="btn btn-ghost" onclick="wordForget()">忘记</button>'
-      + '<button class="btn btn-primary" onclick="' + (last ? 'finishReview()' : 'wordNext()') + '">' + (last ? '复习完成' : '认识，下一个') + '</button>';
+    actions.innerHTML = '<button class="btn btn-primary" onclick="' + (last ? 'finishReview()' : 'wordNext()') + '">' + (last ? '复习完成' : '下一个') + '</button>';
   }
   document.querySelector('#screen-word .wrap').scrollTop = 0;
 }
